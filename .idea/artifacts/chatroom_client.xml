@@ -1,0 +1,24 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="chatroom-client">
+    <output-path>$PROJECT_DIR$/out/artifacts/chatroom_client</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="client.App" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="title" value="" />
+        <option name="vendor" value="" />
+        <option name="version" value="" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="chatroom_client.jar">
+        <element id="module-output" name="chatroom-client" />
+      </element>
+      <element id="module-output" name="common" />
+      <element id="library" level="project" name="Maven: io.netty:netty-all:4.1.50.Final" />
+      <element id="library" level="project" name="Maven: com.h2database:h2:1.4.200" />
+      <element id="library" level="project" name="Maven: org.mybatis:mybatis:3.5.4" />
+    </root>
+  </artifact>
+</component>
