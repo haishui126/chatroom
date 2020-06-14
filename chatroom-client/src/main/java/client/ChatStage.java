@@ -2,6 +2,7 @@ package client;
 
 import common.dao.MessageDao;
 import common.model.Message;
+import common.model.UploadFile;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,8 +12,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,6 +30,7 @@ public class ChatStage extends Application {
     ClientHandler handler = ClientHandler.getInstance();
     private ListView<Message> messageListView;
     private TextArea msgArea;
+    private Button chooseFileBtn;
 
     public ChatStage(String me, String friend) {
         this.me = me;
@@ -51,7 +57,10 @@ public class ChatStage extends Application {
         messageListView.getItems().addAll(messageDao.getAll(me, friend));
         msgArea = new TextArea();
         Button sendBtn = new Button("发送(回车)");
-        vBox.getChildren().addAll(messageListView, msgArea, sendBtn);
+        ButtonBar buttonBar = new ButtonBar();
+        chooseFileBtn = new Button("文件");
+        buttonBar.getButtons().add(chooseFileBtn);
+        vBox.getChildren().addAll(messageListView, buttonBar, msgArea, sendBtn);
         messageListView.setCellFactory(listView -> new ListCell<>() {
             @Override
             protected void updateItem(Message message, boolean empty) {
@@ -87,6 +96,12 @@ public class ChatStage extends Application {
         sendBtn.setOnMouseClicked(mouseEvent -> {
             sendMessage();
         });
+
+        chooseFileBtn.setOnMouseClicked(mouseEvent -> {
+            FileChooser fileChooser = new FileChooser();
+            File file = fileChooser.showOpenDialog(chooseFileBtn.getScene().getWindow());
+            sendFile(file);
+        });
     }
 
     private void sendMessage() {
@@ -98,6 +113,27 @@ public class ChatStage extends Application {
             messageListView.getItems().add(message);
             messageListView.scrollTo(message);
             msgArea.setText("");
+        }
+    }
+
+    private void sendFile(File file) {
+        if (file != null) {
+            //发送文件
+            UploadFile uploadFile = new UploadFile();
+            uploadFile.setFrom(me);
+            uploadFile.setTo(friend);
+            uploadFile.setFilename(file.getName());
+            try (FileInputStream inputStream = new FileInputStream(file)) {
+                uploadFile.setBytes(inputStream.readAllBytes());
+                uploadFile.setSize(file.length());
+                handler.sendFile(uploadFile);
+                Message message = new Message(me, friend, "发送文件【" + file.getName() + "】给对方");
+                messageDao.save(message);
+                messageListView.getItems().add(message);
+                messageListView.scrollTo(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

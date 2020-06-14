@@ -2,6 +2,7 @@ package server;
 
 import common.model.Message;
 import common.model.Response;
+import common.model.UploadFile;
 import common.model.User;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -57,6 +58,17 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.channel().writeAndFlush(new Response(false, "对方不在线！"));
             } else {
                 channel.writeAndFlush(msg);
+            }
+        }
+        if (msg instanceof UploadFile){
+            UploadFile uploadFile = (UploadFile) msg;
+            Channel channel = onlineUser.get(uploadFile.getTo());
+            log.addLog(uploadFile.getFrom() + "向" + uploadFile.getTo() + "发送文件");
+            if (channel == null) {
+                log.addLog("文件发送失败：" + uploadFile.getTo() + "不在线");
+                ctx.channel().writeAndFlush(new Response(false, "对方不在线！"));
+            } else {
+                channel.writeAndFlush(uploadFile);
             }
         }
     }

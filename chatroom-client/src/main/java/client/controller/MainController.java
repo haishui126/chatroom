@@ -2,11 +2,15 @@ package client.controller;
 
 import client.ChatStage;
 import client.ClientHandler;
+import common.model.Message;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -29,6 +33,27 @@ public class MainController implements Initializable {
                     e.printStackTrace();
                 }
             }
+            stage.addMessage(message);
+        });
+
+        handler.setFileListener(uploadFile -> {
+            File file = new File("./fileRecv/" + uploadFile.getFilename());
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                outputStream.write(uploadFile.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ChatStage stage = ChatStage.get(uploadFile.getFrom());
+            if (stage == null) {
+                stage = new ChatStage(username, uploadFile.getFrom());
+                try {
+                    stage.start(new Stage());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            Message message = new Message(uploadFile.getFrom(), uploadFile.getTo(), "接收到对方发来的文件【" + uploadFile.getFilename() + "】，已保存在软件fileRecv文件夹下");
             stage.addMessage(message);
         });
     }

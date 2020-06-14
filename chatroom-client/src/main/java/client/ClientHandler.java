@@ -1,7 +1,8 @@
 package client;
 
-import common.model.Response;
 import common.model.Message;
+import common.model.Response;
+import common.model.UploadFile;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,6 +12,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     private static ClientHandler handler = null;
     private LoginResponseListener loginResponseListener;
     private MessageListener messageListener;
+    private FileListener fileListener;
     private static Channel channel;
 
     private ClientHandler() {
@@ -41,6 +43,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             Platform.runLater(() -> loginResponseListener.onReceive((Response) msg));
         } else if (msg instanceof Message) {
             Platform.runLater(() -> messageListener.onReceive((Message) msg));
+        } else if (msg instanceof UploadFile) {
+            Platform.runLater(() -> fileListener.onReceive((UploadFile) msg));
         } else {
             throw new Exception("未知的消息类型！");
         }
@@ -61,6 +65,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         this.messageListener = messageListener;
     }
 
+    public void setFileListener(FileListener fileListener) {
+        this.fileListener = fileListener;
+    }
+
     public interface LoginResponseListener {
         void onReceive(Response response);
     }
@@ -69,7 +77,15 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         void onReceive(Message message);
     }
 
+    public interface FileListener {
+        void onReceive(UploadFile file);
+    }
+
     public void sendMessage(Message message) {
         channel.writeAndFlush(message);
+    }
+
+    public void sendFile(UploadFile file) {
+        channel.writeAndFlush(file);
     }
 }
