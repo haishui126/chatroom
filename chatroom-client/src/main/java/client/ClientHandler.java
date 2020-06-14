@@ -1,5 +1,6 @@
 package client;
 
+import common.model.GroupMessage;
 import common.model.Message;
 import common.model.Response;
 import common.model.UploadFile;
@@ -13,6 +14,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     private LoginResponseListener loginResponseListener;
     private MessageListener messageListener;
     private FileListener fileListener;
+    private GroupMessageListener groupMessageListener;
     private static Channel channel;
 
     private ClientHandler() {
@@ -45,6 +47,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             Platform.runLater(() -> messageListener.onReceive((Message) msg));
         } else if (msg instanceof UploadFile) {
             Platform.runLater(() -> fileListener.onReceive((UploadFile) msg));
+        } else if (msg instanceof GroupMessage) {
+            Platform.runLater(() -> groupMessageListener.onReceive((GroupMessage) msg));
         } else {
             throw new Exception("未知的消息类型！");
         }
@@ -69,6 +73,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         this.fileListener = fileListener;
     }
 
+    public void setGroupMessageListener(GroupMessageListener groupMessageListener) {
+        this.groupMessageListener = groupMessageListener;
+    }
+
     public interface LoginResponseListener {
         void onReceive(Response response);
     }
@@ -81,7 +89,15 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         void onReceive(UploadFile file);
     }
 
+    public interface GroupMessageListener {
+        void onReceive(GroupMessage message);
+    }
+
     public void sendMessage(Message message) {
+        channel.writeAndFlush(message);
+    }
+
+    public void sendGroupMessage(GroupMessage message) {
         channel.writeAndFlush(message);
     }
 

@@ -2,6 +2,7 @@ package client.controller;
 
 import client.ChatStage;
 import client.ClientHandler;
+import client.GroupStage;
 import common.model.Message;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -56,6 +57,13 @@ public class MainController implements Initializable {
             Message message = new Message(uploadFile.getFrom(), uploadFile.getTo(), "接收到对方发来的文件【" + uploadFile.getFilename() + "】，已保存在软件fileRecv文件夹下");
             stage.addMessage(message);
         });
+
+        handler.setGroupMessageListener(message -> {
+            GroupStage stage = GroupStage.get(message.getGroup());
+            if (stage != null) {
+                stage.addMessage(message);
+            }
+        });
     }
 
     public void chat() {
@@ -75,5 +83,20 @@ public class MainController implements Initializable {
 
     public static void setUsername(String username) {
         MainController.username = username;
+    }
+
+    public void groupChat() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("加入群聊");
+        dialog.setHeaderText(null);
+        dialog.setContentText("群名称：");
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(name -> {
+            try {
+                new GroupStage(username, name).start(new Stage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

@@ -1,6 +1,8 @@
 package common;
 
+import common.dao.GroupMessageDao;
 import common.dao.MessageDao;
+import common.model.GroupMessage;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
@@ -17,9 +19,11 @@ public class DB {
         Environment environment = new Environment("1", new JdbcTransactionFactory(), dataSource);
         Configuration configuration = new Configuration(environment);
         configuration.addMapper(MessageDao.class);
+        configuration.addMapper(GroupMessageDao.class);
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
         session = sqlSessionFactory.openSession(true);
         session.getMapper(MessageDao.class).createTable();
+        session.getMapper(GroupMessageDao.class).createTable();
     }
 
     public <T> T getDao(Class<T> tClass) {

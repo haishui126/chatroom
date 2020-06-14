@@ -1,9 +1,6 @@
 package server;
 
-import common.model.Message;
-import common.model.Response;
-import common.model.UploadFile;
-import common.model.User;
+import common.model.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -11,6 +8,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,6 +18,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     //address-username
     private static final Map<String, String> address2username = new LinkedHashMap<>();
     private static final ObservableList<String> onlineUsername = FXCollections.observableArrayList();
+    //group-(username-channel)
+    private static final Map<String, Map<String, Channel>> group = new LinkedHashMap<>();
     private Log log;
 
     // channel断开
@@ -60,7 +60,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 channel.writeAndFlush(msg);
             }
         }
-        if (msg instanceof UploadFile){
+        if (msg instanceof UploadFile) {
             UploadFile uploadFile = (UploadFile) msg;
             Channel channel = onlineUser.get(uploadFile.getTo());
             log.addLog(uploadFile.getFrom() + "向" + uploadFile.getTo() + "发送文件");
@@ -69,6 +69,27 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 ctx.channel().writeAndFlush(new Response(false, "对方不在线！"));
             } else {
                 channel.writeAndFlush(uploadFile);
+            }
+        }
+
+        if (msg instanceof GroupMessage) {
+            GroupMessage groupMessage = (GroupMessage) msg;
+            if (groupMessage.getFlag() == 1) {
+                //加入群聊
+                //如果没有群，创建
+                group.computeIfAbsent(groupMessage.getGroup(), k -> new LinkedHashMap<>());
+                group.get(groupMessage.getGroup()).put(groupMessage.getFrom(), ctx.channel());
+            } else if (groupMessage.getFlag() == -1) {
+                //退出群聊
+                group.get(groupMessage.getGroup()).remove(groupMessage.getFrom());
+            } else {
+                //发消息
+                Collection<Channel> channels = group.get(groupMessage.getGroup()).values();
+                for (Channel channel : channels) {
+                    if (!channel.equals(ctx.channel())) {
+                        channel.writeAndFlush(groupMessage);
+                    }
+                }
             }
         }
     }
