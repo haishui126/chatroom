@@ -1,7 +1,6 @@
 package client;
 
-import client.dao.MessageDao;
-import client.util.DB;
+import common.DB;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,6 +11,7 @@ import java.io.IOException;
 
 public class App extends Application {
     private static Stage stage;
+    private static DB db;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -34,7 +34,14 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-        DB.getInstance().getDao(MessageDao.class).createTable();
         launch(args);
+    }
+
+    public static void initDB(String name) {
+        db = new DB(name);
+    }
+
+    public static DB getDB() {
+        return App.db;
     }
 }

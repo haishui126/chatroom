@@ -1,15 +1,15 @@
-package common;
+package common.model;
 
 import java.io.Serializable;
 
-public class LoginResponse implements Serializable {
+public class Response implements Serializable {
     private boolean success;
     private String msg;
 
-    public LoginResponse() {
+    public Response() {
     }
 
-    public LoginResponse(boolean success, String msg) {
+    public Response(boolean success, String msg) {
         this.success = success;
         this.msg = msg;
     }

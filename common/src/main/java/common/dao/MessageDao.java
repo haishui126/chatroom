@@ -1,6 +1,6 @@
-package client.dao;
+package common.dao;
 
-import common.Message;
+import common.model.Message;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -16,6 +16,6 @@ public interface MessageDao {
     @Insert("insert into message(`from`, `to`, msg) values (#{from}, #{to}, #{msg})")
     void save(Message message);
 
-    @Select("select * from message where `to`=#{friend} or `from`=#{friend} limit 5")
-    List<Message> getAll();
+    @Select("select * from message where (`from`=#{param1} and `to`=#{param2}) or (`from`=#{param2} and `to`=#{param1})")
+    List<Message> getAll(String me, String friend);
 }

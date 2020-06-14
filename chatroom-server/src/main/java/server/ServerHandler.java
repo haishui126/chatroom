@@ -1,8 +1,8 @@
 package server;
 
-import common.LoginResponse;
-import common.Message;
-import common.User;
+import common.model.Message;
+import common.model.Response;
+import common.model.User;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -14,7 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
+    //username-channel
     private static final Map<String, Channel> onlineUser = new LinkedHashMap<>();
+    //address-username
     private static final Map<String, String> address2username = new LinkedHashMap<>();
     private static final ObservableList<String> onlineUsername = FXCollections.observableArrayList();
     private Log log;
@@ -38,13 +40,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof User) {
             User user = (User) msg;
             if (onlineUser.containsKey(user.getUsername())) {
-                ctx.channel().write(new LoginResponse(false, "该用户名已被使用！"));
+                ctx.channel().write(new Response(false, "该用户名已被使用！"));
                 return;
             }
             address2username.put(ctx.channel().remoteAddress().toString(), user.getUsername());
             onlineUser.put(user.getUsername(), ctx.channel());
             Platform.runLater(() -> onlineUsername.add(user.getUsername()));
-            ctx.channel().write(new LoginResponse(true, "登陆成功！"));
+            ctx.channel().write(new Response(true, "登陆成功！"));
         }
         if (msg instanceof Message) {
             Message m = (Message) msg;
@@ -52,7 +54,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             log.addLog(m.getFrom() + "向" + m.getTo() + "发送信息");
             if (channel == null) {
                 log.addLog("消息发送失败：" + m.getTo() + "不在线");
-                ctx.channel().writeAndFlush(new LoginResponse(false, "对方不在线！"));
+                ctx.channel().writeAndFlush(new Response(false, "对方不在线！"));
             } else {
                 channel.writeAndFlush(msg);
             }

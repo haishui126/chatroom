@@ -82,7 +82,8 @@ public class PrimaryController implements Initializable {
                     .childHandler(new ChannelInitializer<SocketChannel>() { // 绑定客户端连接时候触发操作
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new ObjectDecoder(1024 * 1024, ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
+                            ch.pipeline().addLast(new ObjectDecoder(1024 * 1024,
+                                    ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
                             ServerHandler serverHandler = new ServerHandler();
                             serverHandler.setLog(msg -> Platform.runLater(() -> {
                                 logListView.getItems().add(msg);

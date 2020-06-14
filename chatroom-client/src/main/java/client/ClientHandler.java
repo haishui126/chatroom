@@ -1,7 +1,7 @@
 package client;
 
-import common.LoginResponse;
-import common.Message;
+import common.model.Response;
+import common.model.Message;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -27,32 +27,18 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         handler = null;
     }
 
-    //    /**
-//     * 向服务端发送数据
-//     */
+    //连接时
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         channel = ctx.channel();
         System.out.println("客户端与服务端通道-开启：" + ctx.channel().localAddress() + "channelActive");
     }
 
-//    /**
-//     * channelInactive
-//     * <p>
-//     * channel 通道 Inactive 不活跃的
-//     * <p>
-//     * 当客户端主动断开服务端的链接后，这个通道就是不活跃的。也就是说客户端与服务端的关闭了通信通道并且不可以传输数据
-//     */
-//    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-//        System.out.println("客户端与服务端通道-关闭：" + ctx.channel().localAddress() + "channelInactive");
-//    }
-
-
+    //读取信息
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println(msg);
-        if (msg instanceof LoginResponse) {
-            Platform.runLater(() -> loginResponseListener.onReceive((LoginResponse) msg));
+        if (msg instanceof Response) {
+            Platform.runLater(() -> loginResponseListener.onReceive((Response) msg));
         } else if (msg instanceof Message) {
             Platform.runLater(() -> messageListener.onReceive((Message) msg));
         } else {
@@ -76,7 +62,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public interface LoginResponseListener {
-        void onReceive(LoginResponse response);
+        void onReceive(Response response);
     }
 
     public interface MessageListener {

@@ -3,7 +3,7 @@ package client.controller;
 import client.App;
 import client.ClientHandler;
 import client.util.AlertUtil;
-import common.User;
+import common.model.User;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -45,7 +45,6 @@ public class LoginController {
         }
 
         EventLoopGroup group = new NioEventLoopGroup();
-        //关闭窗口后断开连接
         ClientHandler clientHandler = ClientHandler.getInstance();
         try {
             Bootstrap b = new Bootstrap();
@@ -57,7 +56,8 @@ public class LoginController {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             System.out.println("正在连接中...");
-                            ch.pipeline().addLast(new ObjectDecoder(1024 * 1024, ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
+                            ch.pipeline().addLast(new ObjectDecoder(1024 * 1024,
+                                    ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
                             ch.pipeline().addLast(clientHandler);
                             ch.pipeline().addLast(new ObjectEncoder());
                         }
@@ -65,6 +65,7 @@ public class LoginController {
             ChannelFuture cf = b.connect().sync(); // 异步连接服务器
             cf.channel().writeAndFlush(new User(username));
             System.out.println("服务端连接成功..."); // 连接完成
+            //关闭窗口后关闭socket
             Platform.runLater(() -> btn.getScene().getWindow().setOnCloseRequest(windowEvent -> {
                 cf.channel().close();
                 group.shutdownGracefully();
@@ -73,6 +74,7 @@ public class LoginController {
                 MainController.setUsername(username);
                 if (response.isSuccess()) {
                     try {
+                        App.initDB(username);
                         App.setRoot("main");
                     } catch (IOException e) {
                         e.printStackTrace();

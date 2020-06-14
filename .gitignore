@@ -1,0 +1,6 @@
+/out/
+/.idea/
+/common/target/
+/chatroom-server/target/
+/chatroom-client/target/
+/db/

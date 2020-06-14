@@ -1,63 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<GridPane prefHeight="268.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/10.0.2-internal"
-          xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controller.LoginController">
+
+<GridPane prefHeight="268.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controller.LoginController">
     <columnConstraints>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="50.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="50.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="50.0"/>
-        <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="50.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="50.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="50.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="10.0" prefWidth="50.0" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="50.0" />
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES"/>
-        <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES"/>
-        <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES"/>
-        <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES"/>
+        <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="15.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <TextField fx:id="ipTF" GridPane.columnIndex="2" GridPane.columnSpan="2">
         <GridPane.margin>
-            <Insets right="70.0"/>
+            <Insets right="70.0" />
         </GridPane.margin>
         <font>
-            <Font size="14.0"/>
+            <Font size="14.0" />
         </font>
     </TextField>
     <Label text="IP地址：" GridPane.columnIndex="1">
         <font>
-            <Font size="14.0"/>
+            <Font size="14.0" />
         </font>
     </Label>
     <Label text="端口号：" GridPane.columnIndex="1" GridPane.rowIndex="1">
         <font>
-            <Font size="14.0"/>
+            <Font size="14.0" />
         </font>
     </Label>
     <TextField fx:id="portTF" GridPane.columnIndex="2" GridPane.rowIndex="1">
         <GridPane.margin>
-            <Insets/>
+            <Insets />
         </GridPane.margin>
         <font>
-            <Font size="14.0"/>
+            <Font size="14.0" />
         </font>
     </TextField>
-    <Button fx:id="btn" mnemonicParsing="false" onAction="#onConnect" text="确定" GridPane.columnIndex="2"
-            GridPane.rowIndex="3">
+    <Button fx:id="btn" mnemonicParsing="false" onAction="#onConnect" text="确定" GridPane.columnIndex="2" GridPane.rowIndex="3">
         <padding>
-            <Insets bottom="5.0" left="20.0" right="20.0" top="5.0"/>
+            <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
         </padding>
     </Button>
     <Label text="昵称：" GridPane.columnIndex="1" GridPane.rowIndex="2">
         <font>
-            <Font size="14.0"/>
+            <Font size="14.0" />
         </font>
     </Label>
     <TextField fx:id="usernameTF" GridPane.columnIndex="2" GridPane.rowIndex="2">
         <font>
-            <Font size="14.0"/>
+            <Font size="14.0" />
         </font>
     </TextField>
 </GridPane>
