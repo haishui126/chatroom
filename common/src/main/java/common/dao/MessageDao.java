@@ -1,10 +1,7 @@
 package common.dao;
 
 import common.model.Message;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -18,4 +15,10 @@ public interface MessageDao {
 
     @Select("select * from message where (`from`=#{param1} and `to`=#{param2}) or (`from`=#{param2} and `to`=#{param1})")
     List<Message> getAll(String me, String friend);
+
+    @Delete("delete from message where `to`=#{param1}")
+    void delete(String username);
+
+    @Select("select * from message where `to`=#{param1}")
+    List<Message> getOfflineMessage(String username);
 }

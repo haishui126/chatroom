@@ -74,6 +74,7 @@ public class LoginController {
                 MainController.setUsername(username);
                 if (response.isSuccess()) {
                     try {
+                        MainController.setUserList(response.getFriends());
                         App.initDB(username);
                         App.setRoot("main");
                     } catch (IOException e) {

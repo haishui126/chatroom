@@ -1,5 +1,8 @@
 package server;
 
+import common.DB;
+import common.dao.MessageDao;
+import common.dao.UserDao;
 import common.model.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,9 +11,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
     //username-channel
@@ -21,12 +22,21 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     //group-(username-channel)
     private static final Map<String, Map<String, Channel>> group = new LinkedHashMap<>();
     private Log log;
+    private final DB db = new DB("server");
+    private final UserDao userDao = db.getDao(UserDao.class);
+    private final MessageDao messageDao = db.getDao(MessageDao.class);
 
     // channel断开
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         String address = ctx.channel().remoteAddress().toString();
         String username = address2username.get(address);
+        List<String> friends = userDao.getFriends(username);
+        for (String friend : friends) {
+            if (onlineUser.containsKey(friend)) {
+                onlineUser.get(friend).writeAndFlush(new User(username, "离线", 0));
+            }
+        }
         log.addLog(username + "下线了");
         Platform.runLater(() -> {
             address2username.remove(address);
@@ -47,15 +57,55 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             address2username.put(ctx.channel().remoteAddress().toString(), user.getUsername());
             onlineUser.put(user.getUsername(), ctx.channel());
             Platform.runLater(() -> onlineUsername.add(user.getUsername()));
-            ctx.channel().write(new Response(true, "登陆成功！"));
+            List<String> users = userDao.getFriends(user.getUsername());
+            List<User> friends = new ArrayList<>();
+            for (String s : users) {
+                if (onlineUser.containsKey(s)) {
+                    onlineUser.get(s).writeAndFlush(new User(user.getUsername(), "在线", 0));
+                }
+                if (onlineUser.containsKey(s)) {
+                    friends.add(new User(s, "在线"));
+                } else {
+                    friends.add(new User(s, "离线"));
+                }
+            }
+            ctx.channel().write(new Response(true, "登陆成功！", friends));
+            List<Message> offlineMessage = messageDao.getOfflineMessage(user.getUsername());
+            for (Message message : offlineMessage) {
+                ctx.channel().writeAndFlush(message);
+            }
+            messageDao.delete(user.getUsername());
         }
+        if (msg instanceof UserOption) {
+            UserOption userOption = (UserOption) msg;
+            if (userOption.getOp() == -1) {//删除好友
+                userDao.delete(userOption.getFrom(), userOption.getTo());
+                userDao.delete(userOption.getTo(), userOption.getFrom());
+                Channel channel = onlineUser.get(userOption.getFrom());
+                if (channel != null) channel.writeAndFlush(new User(userOption.getTo(), "在线", -1));
+                Channel channel1 = onlineUser.get(userOption.getTo());
+                if (channel1 != null) channel1.writeAndFlush(new User(userOption.getFrom(), "在线", -1));
+            } else if (userOption.getOp() == 0) {
+                if (onlineUser.containsKey(userOption.getTo())) {
+                    onlineUser.get(userOption.getTo()).writeAndFlush(userOption);
+                } else {
+                    ctx.writeAndFlush(new Response(false, "对方不在线"));
+                }
+            } else {
+                userDao.save(userOption.getFrom(), userOption.getTo());
+                userDao.save(userOption.getTo(), userOption.getFrom());
+                onlineUser.get(userOption.getFrom()).writeAndFlush(new User(userOption.getTo(), "在线", 1));
+                onlineUser.get(userOption.getTo()).writeAndFlush(new User(userOption.getFrom(), "在线", 1));
+            }
+        }
+
         if (msg instanceof Message) {
             Message m = (Message) msg;
             Channel channel = onlineUser.get(m.getTo());
             log.addLog(m.getFrom() + "向" + m.getTo() + "发送信息");
             if (channel == null) {
-                log.addLog("消息发送失败：" + m.getTo() + "不在线");
-                ctx.channel().writeAndFlush(new Response(false, "对方不在线！"));
+                //不在线时，保存在服务端
+                messageDao.save(m);
             } else {
                 channel.writeAndFlush(msg);
             }

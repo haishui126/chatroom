@@ -2,7 +2,7 @@ package common;
 
 import common.dao.GroupMessageDao;
 import common.dao.MessageDao;
-import common.model.GroupMessage;
+import common.dao.UserDao;
 import org.apache.ibatis.datasource.pooled.PooledDataSource;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
@@ -20,10 +20,12 @@ public class DB {
         Configuration configuration = new Configuration(environment);
         configuration.addMapper(MessageDao.class);
         configuration.addMapper(GroupMessageDao.class);
+        configuration.addMapper(UserDao.class);
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
         session = sqlSessionFactory.openSession(true);
         session.getMapper(MessageDao.class).createTable();
         session.getMapper(GroupMessageDao.class).createTable();
+        session.getMapper(UserDao.class).createTable();
     }
 
     public <T> T getDao(Class<T> tClass) {
